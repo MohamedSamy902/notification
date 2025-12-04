@@ -1,0 +1,39 @@
+{
+    "name": "creativeminds/fcm-notifications",
+    "description": "نظام إشعارات Firebase Cloud Messaging متكامل لـ Laravel",
+    "type": "library",
+    "keywords": [
+        "laravel",
+        "firebase",
+        "fcm",
+        "notifications",
+        "push-notifications",
+        "cloud-messaging"
+    ],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Creative Minds",
+            "email": "info@creativeminds.com"
+        }
+    ],
+    "require": {
+        "php": "^8.0",
+        "laravel/framework": "^9.0|^10.0|^11.0",
+        "guzzlehttp/guzzle": "^7.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\Packages\\FcmNotifications\\": "src/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "App\\Packages\\FcmNotifications\\FcmNotificationServiceProvider"
+            ]
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}
