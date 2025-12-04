@@ -107,7 +107,7 @@ Test: إضافة أو تحديث اختبارات
 إذا كان لديك أي سؤال، يمكنك:
 
 - فتح Issue
-- مراسلتنا على info@creativeminds.com
+- مراسلتنا على info@mohamedsamy.com
 
 ## Code of Conduct
 

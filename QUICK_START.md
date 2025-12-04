@@ -21,7 +21,7 @@ cp -r packages/fcm-notifications /path/to/new/project/packages/
     }
   ],
   "require": {
-    "creativeminds/fcm-notifications": "*"
+    "mohamedsamy/fcm-notifications": "*"
   }
 }
 ```

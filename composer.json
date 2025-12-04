@@ -1,5 +1,5 @@
 {
-    "name": "creativeminds/fcm-notifications",
+    "name": "mohamedsamy/fcm-notifications",
     "description": "نظام إشعارات Firebase Cloud Messaging متكامل لـ Laravel",
     "type": "library",
     "keywords": [
@@ -13,8 +13,8 @@
     "license": "MIT",
     "authors": [
         {
-            "name": "Creative Minds",
-            "email": "info@creativeminds.com"
+            "name": "Mohamed Samy",
+            "email": "mohamedsamy9029@gmail.com"
         }
     ],
     "require": {
