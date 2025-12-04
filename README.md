@@ -2,8 +2,8 @@
 
 ## نظام إشعارات Firebase Cloud Messaging متكامل لـ Laravel
 
-[![PHP Version](https://img.shields.io/badge/PHP-8.0%2B-blue)](https://php.net)
-[![Laravel Version](https://img.shields.io/badge/Laravel-9%2B%7C10%2B%7C11%2B-red)](https://laravel.com)
+[![PHP Version](https://img.shields.io/badge/PHP-8.1%2B-blue)](https://php.net)
+[![Laravel Version](https://img.shields.io/badge/Laravel-10%2B%7C11%2B%7C12%2B-red)](https://laravel.com)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
 [![Latest Version](https://img.shields.io/badge/version-1.1.0-orange)](https://github.com/MohamedSamy902/notification/releases)
 
@@ -438,8 +438,8 @@ tail -f storage/logs/laravel.log
 
 ## 📊 المتطلبات
 
-- PHP 8.0 أو أحدث
-- Laravel 9.x، 10.x، أو 11.x
+- PHP 8.1 أو أحدث
+- Laravel 10.x، 11.x، أو 12.x
 - مشروع Firebase مع Cloud Messaging مفعّل
 - Service Account Key من Firebase
 

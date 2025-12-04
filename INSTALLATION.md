@@ -54,6 +54,13 @@ cp ~/Downloads/your-firebase-key.json storage/app/firebase_credentials.json
 chmod 600 storage/app/firebase_credentials.json
 ```
 
+### 📊 المتطلبات
+
+- PHP 8.1 أو أحدث
+- Laravel 10.x، 11.x، أو 12.x
+- مشروع Firebase مع Cloud Messaging مفعّل
+- Service Account Key من Firebase
+
 ✅ **انتهى!** الآن اتبع باقي الخطوات في [دليل الإعداد الكامل](COMPLETE_SETUP_GUIDE_AR.md)
 
 ---
