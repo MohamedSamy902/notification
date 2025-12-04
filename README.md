@@ -5,10 +5,100 @@
 [![PHP Version](https://img.shields.io/badge/PHP-8.0%2B-blue)](https://php.net)
 [![Laravel Version](https://img.shields.io/badge/Laravel-9%2B%7C10%2B%7C11%2B-red)](https://laravel.com)
 [![License](https://img.shields.io/badge/License-MIT-green)](LICENSE)
-[![SOLID Principles](https://img.shields.io/badge/SOLID-Principles-orange)](SOLID_PRINCIPLES_AR.md)
-[![Clean Code](https://img.shields.io/badge/Clean-Code-brightgreen)](INSTALLATION_GUIDE_AR.md)
+[![Latest Version](https://img.shields.io/badge/version-1.1.0-orange)](https://github.com/MohamedSamy902/notification/releases)
 
 هذا الـ Package يوفر نظام إشعارات متكامل باستخدام Firebase Cloud Messaging (FCM) مع دعم كامل للويب، Android، و iOS. تم بناؤه وفقاً لأفضل الممارسات ومبادئ **SOLID** لضمان كود نظيف وقابل للصيانة والتوسع.
+
+---
+
+## 📦 التثبيت
+
+### الطريقة 1: عبر Composer (موصى بها)
+
+```bash
+composer require mohamedsamy/fcm-notifications:dev-main
+```
+
+### الطريقة 2: من GitHub مباشرة
+
+أضف إلى `composer.json`:
+
+```json
+{
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/MohamedSamy902/notification"
+    }
+  ],
+  "require": {
+    "mohamedsamy/fcm-notifications": "dev-main"
+  }
+}
+```
+
+ثم شغّل:
+
+```bash
+composer update
+```
+
+### الطريقة 3: تثبيت إصدار محدد
+
+```bash
+composer require mohamedsamy/fcm-notifications:v1.1.0
+```
+
+---
+
+## ⚙️ الإعداد السريع
+
+### 1. نشر الملفات
+
+```bash
+# نشر كل شيء مرة واحدة
+php artisan vendor:publish --provider="App\Packages\FcmNotifications\FcmNotificationServiceProvider"
+
+# أو نشر كل شيء على حدة:
+php artisan vendor:publish --tag=fcm-notifications-config
+php artisan vendor:publish --tag=fcm-notifications-migrations
+php artisan vendor:publish --tag=fcm-notifications-views
+php artisan vendor:publish --tag=fcm-notifications-assets
+```
+
+### 2. تشغيل Migrations
+
+```bash
+php artisan migrate
+```
+
+### 3. إعداد Firebase
+
+1. اذهب إلى [Firebase Console](https://console.firebase.google.com/)
+2. أنشئ مشروع جديد أو اختر مشروع موجود
+3. احصل على Service Account Key من Project Settings → Service Accounts
+4. احفظ الملف في `storage/app/firebase_credentials.json`
+
+### 4. إعداد متغيرات البيئة
+
+أضف إلى `.env`:
+
+```env
+# مسار Firebase Credentials
+FIREBASE_CREDENTIALS=app/firebase_credentials.json
+
+# Firebase Configuration
+FIREBASE_API_KEY=your_api_key
+FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+FIREBASE_PROJECT_ID=your_project_id
+FIREBASE_STORAGE_BUCKET=your_project.appspot.com
+FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+FIREBASE_APP_ID=your_app_id
+FIREBASE_VAPID_KEY=your_vapid_key
+
+# إعدادات العرض (اختياري)
+FCM_DISPLAY_TYPE=both
+```
 
 ---
 
@@ -56,422 +146,111 @@
 - ✅ **Well Documented**: توثيق شامل بالعربية والإنجليزية
 - ✅ **Testable**: سهل الاختبار باستخدام Mocks
 
-## المتطلبات الأساسية (Required)
+---
 
-1. **Laravel**: 9.x أو أحدث
-2. **PHP**: 8.0 أو أحدث
-3. **Firebase Project**: مشروع Firebase مع تفعيل Cloud Messaging
-4. **Service Account Key**: ملف JSON من Firebase Console
+## 🚀 الاستخدام السريع
 
-## التثبيت
+### 1. إعداد Models
 
-### 1. نسخ المجلد
-
-انسخ مجلد `packages/fcm-notifications` إلى مشروعك الجديد.
-
-### 2. تسجيل Service Provider
-
-في ملف `config/app.php`:
-
-```php
-'providers' => [
-    // ...
-    App\Packages\FcmNotifications\FcmNotificationServiceProvider::class,
-],
-```
-
-### 3. نشر الملفات
+أنشئ Models المطلوبة:
 
 ```bash
-php artisan vendor:publish --tag=fcm-notifications
+php artisan make:model DeviceToken
+php artisan make:model NotificationLog
 ```
 
-هذا سينشر:
-
-- Migration لجدول `notification_logs`
-- Migration لجدول `device_tokens`
-- ملف الإعدادات `config/fcm-notifications.php`
-
-### 4. تشغيل Migrations
-
-```bash
-php artisan migrate
-```
-
-### 5. إعداد Firebase
-
-1. اذهب إلى [Firebase Console](https://console.firebase.google.com/)
-2. اختر مشروعك أو أنشئ مشروع جديد
-3. اذهب إلى Project Settings > Service Accounts
-4. اضغط على "Generate New Private Key"
-5. احفظ الملف في `storage/app/firebase_credentials.json`
-
-### 6. إعداد متغيرات البيئة
-
-في ملف `.env`:
-
-```env
-FIREBASE_CREDENTIALS=app/firebase_credentials.json
-```
-
-## الاستخدام
-
-### 1. إرسال إشعار لمستخدم محدد
+**DeviceToken Model** (`app/Models/DeviceToken.php`):
 
 ```php
-use App\Packages\FcmNotifications\Services\NotificationService;
+<?php
 
-$notificationService = app(NotificationService::class);
+namespace App\Models;
 
-$notificationService->sendToUser(
-    $user,                    // Required: User Model
-    'عنوان الإشعار',          // Required: Title
-    'محتوى الإشعار',          // Required: Body
-    ['key' => 'value'],       // Optional: Custom Data
-    [                         // Optional: Options
-        'image' => 'https://example.com/image.png',
-        'link' => 'https://example.com',
-        'sound' => 'default'
-    ]
-);
+use Illuminate\Database\Eloquent\Model;
+
+class DeviceToken extends Model
+{
+    protected $fillable = [
+        'user_id', 'fcm_token', 'device_type',
+        'device_name', 'last_used_at', 'is_active',
+    ];
+
+    protected $casts = [
+        'last_used_at' => 'datetime',
+        'is_active' => 'boolean',
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+}
 ```
 
-### 2. إرسال إشعار لتوكن محدد
+**NotificationLog Model** (`app/Models/NotificationLog.php`):
 
 ```php
-$notificationService->sendToToken(
-    'FCM_TOKEN_HERE',         // Required: FCM Token
-    'عنوان الإشعار',          // Required: Title
-    'محتوى الإشعار',          // Required: Body
-    ['key' => 'value'],       // Optional: Custom Data
-    [                         // Optional: Options
-        'image' => 'https://example.com/image.png',
-        'link' => 'https://example.com',
-        'sound' => 'default'
-    ]
-);
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+
+class NotificationLog extends Model
+{
+    protected $fillable = [
+        'user_id', 'title', 'body', 'data', 'image',
+        'link', 'type', 'is_read', 'read_at', 'is_sent', 'error_message',
+    ];
+
+    protected $casts = [
+        'data' => 'array',
+        'is_read' => 'boolean',
+        'is_sent' => 'boolean',
+        'read_at' => 'datetime',
+    ];
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+}
 ```
 
-### 3. إرسال إشعار لـ Topic
+**تحديث User Model** (`app/Models/User.php`):
 
 ```php
-$notificationService->sendToTopic(
-    'news',                   // Required: Topic Name
-    'عنوان الإشعار',          // Required: Title
-    'محتوى الإشعار',          // Required: Body
-    ['key' => 'value'],       // Optional: Custom Data
-    [                         // Optional: Options
-        'image' => 'https://example.com/image.png',
-        'link' => 'https://example.com',
-        'sound' => 'default'
-    ]
-);
+public function devices()
+{
+    return $this->hasMany(DeviceToken::class);
+}
+
+public function notifications()
+{
+    return $this->hasMany(NotificationLog::class);
+}
 ```
 
-### 4. الاشتراك في Topic
-
-```php
-$notificationService->subscribeTokensToTopic(
-    'FCM_TOKEN_HERE',         // Required: FCM Token
-    'news'                    // Required: Topic Name
-);
-```
-
-## إعداد الـ Frontend
-
-### 1. إضافة Firebase SDK
-
-في ملف HTML الرئيسي:
-
-```html
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-messaging-compat.js"></script>
-```
-
-### 2. استخدام Blade Template الجاهز (الطريقة الأسهل)
+### 2. إعداد Frontend
 
 في ملف Layout الرئيسي (مثل `resources/views/layouts/app.blade.php`):
 
 ```blade
-@include('fcm-notifications::fcm-notifications')
+<!DOCTYPE html>
+<html>
+<head>
+    <title>My App</title>
+</head>
+<body>
+    @yield('content')
+
+    <!-- إضافة FCM Notifications -->
+    @include('fcm-notifications::fcm-notifications')
+</body>
+</html>
 ```
 
-هذا سيضيف تلقائياً:
-
-- ✅ Firebase SDK
-- ✅ Sweet Alert 2
-- ✅ كل الإعدادات من ملف الـ Config
-- ✅ معالجة الإشعارات تلقائياً
-
-### 3. الطريقة اليدوية (للتخصيص الكامل)
-
-#### أ. إضافة Sweet Alert 2
-
-```html
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-```
-
-#### ب. تهيئة Firebase
-
-```javascript
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  projectId: "YOUR_PROJECT_ID",
-  messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-  appId: "YOUR_APP_ID",
-};
-
-firebase.initializeApp(firebaseConfig);
-const messaging = firebase.messaging();
-```
-
-#### ج. إعدادات العرض
-
-```javascript
-const notificationConfig = {
-  displayType: "both", // 'system', 'sweet_alert', 'both'
-  sweetAlert: {
-    enabled: true,
-    position: "top-end",
-    timer: 5000,
-    toast: true,
-    showConfirmButton: false,
-    iconType: "info",
-    showCloseButton: true,
-    allowOutsideClick: true,
-  },
-  system: {
-    enabled: true,
-    requireInteraction: true,
-    badge: "/favicon.ico",
-  },
-};
-```
-
-#### د. طلب الإذن والحصول على التوكن
-
-```javascript
-Notification.requestPermission().then((permission) => {
-  if (permission === "granted") {
-    messaging.getToken({ vapidKey: "YOUR_VAPID_KEY" }).then((token) => {
-      // إرسال التوكن للسيرفر
-      saveTokenToServer(token);
-    });
-  }
-});
-```
-
-#### هـ. استقبال الإشعارات
-
-```javascript
-messaging.onMessage(function (payload) {
-  console.log("Message received. ", payload);
-
-  switch (notificationConfig.displayType) {
-    case "sweet_alert":
-      showSweetAlertNotification(payload);
-      break;
-    case "system":
-      showSystemNotification(payload);
-      break;
-    case "both":
-      showSweetAlertNotification(payload);
-      showSystemNotification(payload);
-      break;
-  }
-});
-```
-
-## خيارات عرض الإشعارات
-
-### أنواع العرض المتاحة
-
-يمكنك التحكم في طريقة عرض الإشعارات من ملف الإعدادات أو من `.env`:
-
-#### 1. Sweet Alert فقط
-
-```env
-FCM_DISPLAY_TYPE=sweet_alert
-```
-
-**المميزات:**
-
-- ✅ تصميم جميل ومتحرك
-- ✅ يظهر في أعلى الصفحة
-- ✅ قابل للتخصيص بالكامل
-- ✅ يدعم الصور
-- ✅ يمكن النقر عليه لفتح الرابط
-
-**الاستخدام المثالي:**
-
-- عندما تريد تجربة مستخدم أفضل
-- للإشعارات داخل التطبيق
-- عندما يكون المستخدم في الصفحة
-
-#### 2. إشعارات النظام فقط
-
-```env
-FCM_DISPLAY_TYPE=system
-```
-
-**المميزات:**
-
-- ✅ إشعارات نظام التشغيل الأصلية
-- ✅ تظهر حتى لو كان المتصفح في الخلفية
-- ✅ صوت الإشعار الافتراضي
-- ✅ تبقى في مركز الإشعارات
-
-**الاستخدام المثالي:**
-
-- للإشعارات المهمة
-- عندما تريد لفت انتباه المستخدم
-- للإشعارات التي يجب أن تبقى
-
-#### 3. كلاهما معاً (الافتراضي)
-
-```env
-FCM_DISPLAY_TYPE=both
-```
-
-**المميزات:**
-
-- ✅ أفضل ما في العالمين
-- ✅ Sweet Alert للتفاعل الفوري
-- ✅ إشعار النظام للرجوع إليه لاحقاً
-
-**الاستخدام المثالي:**
-
-- للإشعارات المهمة جداً
-- عندما تريد ضمان رؤية المستخدم للإشعار
-
-### تخصيص Sweet Alert
-
-في ملف `config/fcm-notifications.php`:
-
-```php
-'display' => [
-    'sweet_alert' => [
-        // تفعيل/تعطيل Sweet Alert
-        'enabled' => true,
-
-        // موقع الإشعار
-        // 'top', 'top-start', 'top-end', 'center', 'bottom', 'bottom-start', 'bottom-end'
-        'position' => 'top-end',
-
-        // مدة العرض بالميلي ثانية (5000 = 5 ثواني)
-        'timer' => 5000,
-
-        // عرض كـ Toast (إشعار صغير في الزاوية)
-        'toast' => true,
-
-        // إظهار زر التأكيد
-        'show_confirm_button' => false,
-
-        // نوع الأيقونة الافتراضي
-        // 'success', 'error', 'warning', 'info', 'question'
-        'icon_type' => 'info',
-
-        // إظهار زر الإغلاق (X)
-        'show_close_button' => true,
-
-        // السماح بالإغلاق عند الضغط خارج الإشعار
-        'allow_outside_click' => true,
-    ],
-],
-```
-
-### مواقع Sweet Alert
-
-| الموقع         | الوصف       | الاستخدام المثالي     |
-| -------------- | ----------- | --------------------- |
-| `top`          | أعلى الوسط  | للإشعارات المهمة      |
-| `top-start`    | أعلى اليسار | للغات LTR             |
-| `top-end`      | أعلى اليمين | للغات RTL (الافتراضي) |
-| `center`       | في الوسط    | للتنبيهات الحرجة      |
-| `bottom`       | أسفل الوسط  | للإشعارات الثانوية    |
-| `bottom-start` | أسفل اليسار | للرسائل البسيطة       |
-| `bottom-end`   | أسفل اليمين | للتحديثات             |
-
-### أنواع الأيقونات
-
-| النوع      | الاستخدام        |
-| ---------- | ---------------- |
-| `success`  | ✅ نجاح العملية  |
-| `error`    | ❌ خطأ أو فشل    |
-| `warning`  | ⚠️ تحذير         |
-| `info`     | ℹ️ معلومات عامة  |
-| `question` | ❓ سؤال أو تأكيد |
-
-### تخصيص نوع الأيقونة من الـ Backend
-
-يمكنك تحديد نوع الأيقونة عند إرسال الإشعار:
-
-```php
-$notificationService->sendToTopic(
-    'news',
-    'عملية ناجحة',
-    'تم حفظ البيانات بنجاح',
-    ['type' => 'success'],  // هنا! 👈
-    [
-        'image' => 'https://example.com/image.png',
-        'link' => 'https://example.com'
-    ]
-);
-```
-
-الأنواع المتاحة في `data['type']`:
-
-- `success` - للنجاح
-- `error` - للأخطاء
-- `warning` - للتحذيرات
-- `info` - للمعلومات (الافتراضي)
-
-### أمثلة عملية
-
-#### مثال 1: إشعار نجاح مع Sweet Alert
-
-```php
-$notificationService->sendToUser(
-    $user,
-    'تم التسجيل بنجاح',
-    'مرحباً بك في منصتنا',
-    ['type' => 'success'],
-    [
-        'image' => 'https://example.com/welcome.png',
-        'link' => '/dashboard'
-    ]
-);
-```
-
-#### مثال 2: تحذير مهم
-
-```php
-$notificationService->sendToTopic(
-    'admins',
-    'تحذير أمني',
-    'محاولة دخول غير مصرح بها',
-    ['type' => 'warning'],
-    [
-        'link' => '/admin/security-logs'
-    ]
-);
-```
-
-#### مثال 3: خطأ يحتاج انتباه
-
-```php
-$notificationService->sendToToken(
-    $fcmToken,
-    'فشل الدفع',
-    'لم نتمكن من إتمام عملية الدفع',
-    ['type' => 'error'],
-    [
-        'link' => '/payment/retry'
-    ]
-);
-```
-
-## Service Worker (Background)
+### 3. إنشاء Service Worker
 
 أنشئ ملف `public/firebase-messaging-sw.js`:
 
@@ -485,7 +264,9 @@ importScripts(
 
 const firebaseConfig = {
   apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_AUTH_DOMAIN",
   projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_STORAGE_BUCKET",
   messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
   appId: "YOUR_APP_ID",
 };
@@ -497,101 +278,201 @@ messaging.onBackgroundMessage(function (payload) {
   const notificationTitle = payload.notification.title;
   const notificationOptions = {
     body: payload.notification.body,
-    icon: payload.notification.icon || payload.notification.image,
+    icon: payload.notification.icon || "/favicon.ico",
     image: payload.notification.image,
-    data: payload.data,
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
 ```
 
-## الخيارات المتاحة (Options)
+### 4. إنشاء API Endpoint
 
-| الخيار  | النوع  | الوصف               | مثال                            |
-| ------- | ------ | ------------------- | ------------------------------- |
-| `image` | string | رابط الصورة         | `https://example.com/image.png` |
-| `link`  | string | رابط يفتح عند الضغط | `https://example.com/page`      |
-| `sound` | string | اسم ملف الصوت       | `default` أو `custom.mp3`       |
-
-## البيانات المخصصة (Custom Data)
-
-يمكنك إرسال أي بيانات إضافية:
+في `routes/api.php`:
 
 ```php
-$data = [
-    'user_id' => 123,
-    'action' => 'view_profile',
-    'url' => '/profile/123'
-];
-```
+use App\Models\DeviceToken;
+use Illuminate\Http\Request;
 
-## Topics
+Route::post('/fcm-token', function (Request $request) {
+    $request->validate([
+        'token' => 'required|string',
+        'device_type' => 'nullable|string',
+        'device_name' => 'nullable|string',
+    ]);
 
-### فصل البيئات
-
-في بيئة `local`، يتم إضافة `_dev` تلقائياً لاسم الـ Topic:
-
-- Production: `news`
-- Local: `news_dev`
-
-### أمثلة Topics شائعة
-
-- `all_users` - كل المستخدمين
-- `admins` - المدراء
-- `news` - الأخبار
-- `offers` - العروض
-
-## حفظ التوكنات
-
-### إنشاء API Endpoint
-
-```php
-Route::post('/api/fcm-token', function(Request $request) {
-    $request->validate(['token' => 'required|string']);
-
-    auth()->user()->devices()->updateOrCreate(
-        ['fcm_token' => $request->token],
-        [
-            'device_type' => $request->device_type ?? 'web',
-            'device_name' => $request->device_name ?? 'Unknown'
-        ]
-    );
+    if (auth()->check()) {
+        DeviceToken::updateOrCreate(
+            ['user_id' => auth()->id(), 'fcm_token' => $request->token],
+            [
+                'device_type' => $request->device_type ?? 'web',
+                'device_name' => $request->device_name ?? 'Unknown',
+                'last_used_at' => now(),
+                'is_active' => true,
+            ]
+        );
+    }
 
     return response()->json(['success' => true]);
 });
 ```
 
-## الأمان
+### 5. إرسال الإشعارات
 
-1. **لا تشارك** ملف `firebase_credentials.json`
-2. **أضف** الملف إلى `.gitignore`
-3. **استخدم** Environment Variables للإعدادات الحساسة
+```php
+use App\Packages\FcmNotifications\Contracts\NotificationServiceInterface;
+use App\Models\User;
 
-## استكشاف الأخطاء
+class NotificationController extends Controller
+{
+    protected NotificationServiceInterface $notificationService;
+
+    public function __construct(NotificationServiceInterface $notificationService)
+    {
+        $this->notificationService = $notificationService;
+    }
+
+    // إرسال لمستخدم محدد
+    public function sendToUser()
+    {
+        $user = User::find(1);
+
+        $this->notificationService->sendToUser(
+            $user,
+            'مرحباً!',
+            'هذا إشعار تجريبي',
+            ['type' => 'success'],
+            [
+                'image' => 'https://example.com/image.png',
+                'link' => 'https://example.com',
+            ]
+        );
+
+        return response()->json(['message' => 'تم إرسال الإشعار']);
+    }
+
+    // إرسال لتوكن محدد
+    public function sendToToken()
+    {
+        $this->notificationService->sendToToken(
+            'FCM_TOKEN_HERE',
+            'عنوان الإشعار',
+            'محتوى الإشعار',
+            ['type' => 'info']
+        );
+
+        return response()->json(['message' => 'تم الإرسال']);
+    }
+
+    // إرسال لـ Topic
+    public function sendToTopic()
+    {
+        $this->notificationService->sendToTopic(
+            'news',
+            'خبر عاجل',
+            'محتوى الخبر',
+            ['type' => 'warning']
+        );
+
+        return response()->json(['message' => 'تم الإرسال']);
+    }
+}
+```
+
+---
+
+## 🎨 التخصيص
+
+### تخصيص Sweet Alert
+
+في `config/fcm-notifications.php`:
+
+```php
+'display' => [
+    'type' => env('FCM_DISPLAY_TYPE', 'both'),  // system, sweet_alert, both
+
+    'sweet_alert' => [
+        'enabled' => true,
+        'position' => 'top-end',  // top, top-start, top-end, center, bottom
+        'timer' => 5000,
+        'toast' => true,
+        'icon_type' => 'info',  // success, error, warning, info, question
+    ],
+],
+```
+
+---
+
+## 🔧 استكشاف الأخطاء
 
 ### الإشعارات لا تصل
 
-1. تأكد من صحة Firebase Credentials
-2. تأكد من تفعيل Cloud Messaging في Firebase
-3. تحقق من صلاحية التوكن
-4. راجع الـ Logs في `storage/logs/laravel.log`
+1. تحقق من Firebase Credentials:
 
-### الصور لا تظهر
+```bash
+cat storage/app/firebase_credentials.json
+```
 
-1. تأكد من أن الرابط مباشر (ينتهي بـ .png, .jpg)
-2. تأكد من أن الصورة متاحة عبر HTTPS
-3. بعض أنظمة التشغيل لا تدعم الصور الكبيرة
+2. تحقق من الـ Logs:
 
-### الروابط لا تعمل
+```bash
+tail -f storage/logs/laravel.log
+```
 
-1. تأكد من إضافة الرابط في `options['link']`
-2. تأكد من معالجة الـ click event في JavaScript
+3. تأكد من تفعيل Cloud Messaging API في Firebase Console
 
-## الدعم
+### Service Worker لا يعمل
 
-للمساعدة أو الإبلاغ عن مشاكل، يرجى فتح Issue في المستودع.
+1. تأكد من وجود الملف في `public/firebase-messaging-sw.js`
+2. افتح Developer Tools → Application → Service Workers
+3. تأكد من استخدام HTTPS أو localhost
 
-## الترخيص
+---
 
-MIT License
+## 📊 المتطلبات
+
+- PHP 8.0 أو أحدث
+- Laravel 9.x، 10.x، أو 11.x
+- مشروع Firebase مع Cloud Messaging مفعّل
+- Service Account Key من Firebase
+
+---
+
+## 🤝 المساهمة
+
+المساهمات مرحب بها! يرجى قراءة [دليل المساهمة](CONTRIBUTING.md) للمزيد من المعلومات.
+
+---
+
+## 📄 الترخيص
+
+هذا الـ Package مرخص تحت [MIT License](LICENSE).
+
+---
+
+## 🔗 الروابط المفيدة
+
+- **GitHub Repository**: [https://github.com/MohamedSamy902/notification](https://github.com/MohamedSamy902/notification)
+- **Packagist**: [https://packagist.org/packages/mohamedsamy/fcm-notifications](https://packagist.org/packages/mohamedsamy/fcm-notifications)
+- **Firebase Console**: [https://console.firebase.google.com/](https://console.firebase.google.com/)
+- **Firebase Documentation**: [https://firebase.google.com/docs/cloud-messaging](https://firebase.google.com/docs/cloud-messaging)
+
+---
+
+## 👨‍💻 المطور
+
+**Mohamed Samy**
+
+- Email: mohamedsamy9029@gmail.com
+- GitHub: [@MohamedSamy902](https://github.com/MohamedSamy902)
+
+---
+
+## 🌟 إذا أعجبك الـ Package
+
+إذا وجدت هذا الـ Package مفيداً، يرجى إعطاءه ⭐ على GitHub!
+
+---
+
+**الإصدار الحالي:** v1.1.0
+**آخر تحديث:** 2025-12-04

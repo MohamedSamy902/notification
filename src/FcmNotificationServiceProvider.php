@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Packages\FcmNotifications;
+namespace MohamedSamy\FcmNotifications;
 
 use Illuminate\Support\ServiceProvider;
 use App\Packages\FcmNotifications\Contracts\NotificationServiceInterface;
