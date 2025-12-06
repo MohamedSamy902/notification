@@ -49,12 +49,15 @@ class SendNotificationController extends Controller
 
         try {
             if ($request->input('target_type') === 'user') {
-                // Assuming User model is App\Models\User
+                // Handle multiple users (comma separated IDs)
+                $recipientIds = explode(',', $request->input('recipient_id'));
                 $userClass = config('auth.providers.users.model', 'App\\Models\\User');
-                $user = $userClass::find($request->input('recipient_id'));
                 
-                if ($user) {
+                $users = $userClass::whereIn('id', $recipientIds)->get();
+
+                foreach ($users as $user) {
                     // Persist notification to custom table for Dashboard History
+                    $storedNotificationId = null;
                     try {
                         $storedNotification = AdvancedNotification::create([
                             'id' => \Illuminate\Support\Str::uuid(),
@@ -64,19 +67,18 @@ class SendNotificationController extends Controller
                             'data' => $notification->toArray($user),
                             'read_at' => null,
                         ]);
-                        Log::info('Notification stored with ID: ' . $storedNotification->id);
+                        $storedNotificationId = $storedNotification->id;
                     } catch (\Exception $e) {
                         Log::error('Failed to store notification: ' . $e->getMessage());
-                        // Continue sending even if storage fails
                     }
 
                     // Use Laravel's native notification system
                     $user->notify($notification);
                     
-                    // Log Analytics
+                    // Log Analytics (Sent)
                     foreach ($channels as $channel) {
                         app(\AdvancedNotifications\Services\AnalyticsService::class)->log(
-                            $storedNotification->id ?? null,
+                            $storedNotificationId,
                             $channel,
                             'sent',
                             $user->id,
@@ -84,15 +86,17 @@ class SendNotificationController extends Controller
                             ['title' => $request->input('title')]
                         );
                     }
-                } else {
-                    return back()->withErrors(['recipient_id' => 'User not found.']);
                 }
+                
+                if ($users->isEmpty()) {
+                    return back()->withErrors(['recipient_id' => 'No users found.']);
+                }
+
             } elseif ($request->input('target_type') === 'topic') {
                 // Send to Topic
                 $topicName = $request->input('recipient_id');
                 
                 if (in_array('fcm', $channels)) {
-                    // Use the Firebase Service directly for Topics
                     $firebaseService = app(\AdvancedNotifications\Services\FirebaseService::class);
                     $firebaseService->sendToTopic(
                         $topicName,
@@ -101,14 +105,50 @@ class SendNotificationController extends Controller
                         $data['metadata']
                     );
                 }
-                
-                // Log generic success for topic
                 Log::info("Notification sent to topic: $topicName");
+
             } elseif ($request->input('target_type') === 'all') {
-                // Send to All Users
-                // This MUST be queued.
-                Log::warning("Mass send requested from dashboard.");
-                // Implementation for mass send would go here (e.g. dispatch a job)
+                // Send to All Users (Chunked)
+                $userClass = config('auth.providers.users.model', 'App\\Models\\User');
+                
+                // Dispatch a Job or process in chunks to avoid timeout
+                // For simplicity in this context, we will use chunking directly, but ideally this should be a Job.
+                $userClass::chunk(100, function ($users) use ($notification, $channels, $request) {
+                    foreach ($users as $user) {
+                        // 1. Store Notification
+                        $storedNotificationId = null;
+                        try {
+                            $storedNotification = AdvancedNotification::create([
+                                'id' => \Illuminate\Support\Str::uuid(),
+                                'type' => get_class($notification),
+                                'notifiable_type' => get_class($user),
+                                'notifiable_id' => $user->id,
+                                'data' => $notification->toArray($user),
+                                'read_at' => null,
+                            ]);
+                            $storedNotificationId = $storedNotification->id;
+                        } catch (\Exception $e) {
+                            // Ignore storage error for mass send to keep speed
+                        }
+
+                        // 2. Send Notification
+                        $user->notify($notification);
+
+                        // 3. Log Analytics
+                        foreach ($channels as $channel) {
+                            app(\AdvancedNotifications\Services\AnalyticsService::class)->log(
+                                $storedNotificationId,
+                                $channel,
+                                'sent',
+                                $user->id,
+                                null,
+                                ['title' => $request->input('title')]
+                            );
+                        }
+                    }
+                });
+                
+                Log::info("Mass notification sent to all users.");
             }
 
             return redirect()->route('advanced-notifications.send.create')
