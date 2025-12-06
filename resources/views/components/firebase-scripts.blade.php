@@ -98,12 +98,24 @@
                 // 5. Handle Foreground Messages
                 messaging.onMessage((payload) => {
                     console.log('Message received. ', payload);
-                    // Dispatch a custom event so the user can listen to it if they want custom UI
-                    const event = new CustomEvent('fcm-notification-received', { detail: payload });
+
+                    // 1. Dispatch a custom event
+                    const event = new CustomEvent('fcm-notification-received', {
+                        detail: payload
+                    });
                     window.dispatchEvent(event);
-                    
-                    // Default behavior: Alert (can be customized)
-                    // alert(payload.notification.title + "\n" + payload.notification.body);
+
+                    // 2. Default behavior: Show Native Notification
+                    if (Notification.permission === "granted" && payload.notification) {
+                        const notificationTitle = payload.notification.title || 'New Notification';
+                        const notificationOptions = {
+                            body: payload.notification.body,
+                            icon: "{{ config('advanced-notifications.firebase.frontend.icon') }}", // Configurable Icon
+                            data: payload.data
+                        };
+
+                        new Notification(notificationTitle, notificationOptions);
+                    }
                 });
 
                 // Start
