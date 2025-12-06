@@ -43,3 +43,14 @@ Route::group(['middleware' => ['web'], 'prefix' => 'dashboard', 'as' => 'advance
     // Analytics
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
 });
+
+// Frontend Routes (Session Based) - Moved from API to ensure cookies work
+Route::group(['middleware' => ['web', 'auth:web'], 'prefix' => 'api/notifications'], function () {
+    // Tokens
+    Route::post('/register-token', [TokenController::class, 'register']);
+    Route::post('/remove-token', [TokenController::class, 'remove']);
+    
+    // Topic Subscription
+    Route::post('/topics/{id}/subscribe', [TopicController::class, 'subscribe']);
+    Route::post('/topics/{id}/unsubscribe', [TopicController::class, 'unsubscribe']);
+});
