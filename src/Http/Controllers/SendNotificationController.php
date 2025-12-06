@@ -54,7 +54,7 @@ class SendNotificationController extends Controller
                 $user = $userClass::find($request->input('recipient_id'));
                 
                 if ($user) {
-                    // Persist notification to get ID
+                    // Persist notification to custom table for Dashboard History
                     try {
                         $storedNotification = AdvancedNotification::create([
                             'id' => \Illuminate\Support\Str::uuid(),
@@ -67,16 +67,16 @@ class SendNotificationController extends Controller
                         Log::info('Notification stored with ID: ' . $storedNotification->id);
                     } catch (\Exception $e) {
                         Log::error('Failed to store notification: ' . $e->getMessage());
-                        throw $e;
+                        // Continue sending even if storage fails
                     }
 
-                    AdvancedNotifications::send($user, $notification);
+                    // Use Laravel's native notification system
+                    $user->notify($notification);
                     
                     // Log Analytics
                     foreach ($channels as $channel) {
-                        Log::info('Logging analytics for channel: ' . $channel);
                         app(\AdvancedNotifications\Services\AnalyticsService::class)->log(
-                            $storedNotification->id,
+                            $storedNotification->id ?? null,
                             $channel,
                             'sent',
                             $user->id,
@@ -89,29 +89,26 @@ class SendNotificationController extends Controller
                 }
             } elseif ($request->input('target_type') === 'topic') {
                 // Send to Topic
-                // For FCM, we use sendToTopic. For other channels, we might need to iterate subscribers.
-                // Currently, sendToTopic in ChannelManager only supports FCM via driver('fcm')
-                // But we want to support multiple channels if possible.
-                // For now, if topic is selected, we primarily target FCM.
+                $topicName = $request->input('recipient_id');
                 
                 if (in_array('fcm', $channels)) {
-                    AdvancedNotifications::sendToTopic(
-                        $request->input('recipient_id'), // Topic Name
-                        'manual_message', // We need a template key usually, but let's overload or use a direct send method
-                        ['title' => $request->input('title'), 'body' => $request->input('body')] // Hacky, ideally we improve sendToTopic signature
+                    // Use the Firebase Service directly for Topics
+                    $firebaseService = app(\AdvancedNotifications\Services\FirebaseService::class);
+                    $firebaseService->sendToTopic(
+                        $topicName,
+                        $request->input('title'),
+                        $request->input('body'),
+                        $data['metadata']
                     );
-                    // Note: The current sendToTopic implementation expects a template key. 
-                    // We might need to refactor sendToTopic to accept raw content or create a sendToTopicRaw method.
-                    // For this iteration, let's assume we update sendToTopic or use a workaround.
                 }
                 
-                // Also send to subscribers in DB for other channels?
-                // This would be a heavy operation, maybe queue it.
+                // Log generic success for topic
+                Log::info("Notification sent to topic: $topicName");
             } elseif ($request->input('target_type') === 'all') {
                 // Send to All Users
                 // This MUST be queued.
-                // For now, we'll just log it as "Not fully implemented for mass send" or implement a basic loop
                 Log::warning("Mass send requested from dashboard.");
+                // Implementation for mass send would go here (e.g. dispatch a job)
             }
 
             return redirect()->route('advanced-notifications.send.create')
