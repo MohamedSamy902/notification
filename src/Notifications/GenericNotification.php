@@ -32,7 +32,13 @@ class GenericNotification extends Notification implements ShouldQueue
         $channels = $this->channels ?? config('advanced-notifications.default_channels');
         
         return array_map(function ($channel) {
-            return $channel === 'fcm' ? \AdvancedNotifications\Channels\FcmChannel::class : $channel;
+            if ($channel === 'fcm') {
+                return \AdvancedNotifications\Channels\FcmChannel::class;
+            }
+            if ($channel === 'realtime') {
+                return 'broadcast';
+            }
+            return $channel;
         }, $channels);
     }
 
@@ -57,5 +63,16 @@ class GenericNotification extends Notification implements ShouldQueue
                 'action_url' => $this->actionUrl,
             ]),
         ];
+    }
+
+    public function toBroadcast($notifiable)
+    {
+        return new \Illuminate\Notifications\Messages\BroadcastMessage([
+            'title' => $this->title,
+            'body' => $this->body,
+            'icon' => $this->icon,
+            'action_url' => $this->actionUrl,
+            'data' => $this->data,
+        ]);
     }
 }
