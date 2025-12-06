@@ -7,7 +7,9 @@ use AdvancedNotifications\Http\Controllers\TokenController;
 use AdvancedNotifications\Http\Controllers\CampaignController;
 use AdvancedNotifications\Http\Controllers\TopicController;
 
-Route::group(['prefix' => 'api/notifications', 'middleware' => ['api', 'auth:sanctum']], function () {
+$middleware = config('advanced-notifications.routes.middleware', ['api', 'auth:sanctum,web']);
+
+Route::group(['prefix' => 'api/notifications', 'middleware' => $middleware], function () {
     // Notifications
     Route::get('/', [NotificationController::class, 'index']);
     Route::get('/unread', [NotificationController::class, 'unread']);

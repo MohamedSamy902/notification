@@ -132,18 +132,49 @@ php artisan migrate
     ```
 3.  تأكد من إعدادات `.env`:
     ```env
-    BROADCAST_CONNECTION=reverb
-    REVERB_APP_ID=...
-    REVERB_APP_KEY=...
-    REVERB_APP_SECRET=...
-    REVERB_HOST="localhost"
-    REVERB_PORT=8080
     REVERB_SCHEME="http"
     ```
+
+### 4. إعدادات Firebase للواجهة الأمامية (Frontend)
+
+لتعمل مكتبة الجافاسكريبت المرفقة، أضف هذه المتغيرات في ملف `.env`:
+
+```env
+FIREBASE_API_KEY=AIzaSy...
+FIREBASE_AUTH_DOMAIN=your-project.firebaseapp.com
+FIREBASE_PROJECT_ID=your-project-id
+FIREBASE_STORAGE_BUCKET=your-project.appspot.com
+FIREBASE_MESSAGING_SENDER_ID=123456789
+FIREBASE_APP_ID=1:123456789:web:abcdef
+FIREBASE_VAPID_KEY=B... (المفتاح الطويل)
+```
 
 ---
 
 ## 💻 الاستخدام (Usage)
+
+### 1. تفعيل الإشعارات في الفرونت إند (Blade)
+
+لقد وفرنا لك مكون (Component) جاهز يقوم بكل العمل الصعب (تهيئة Firebase، طلب الإذن، تسجيل التوكن، والاشتراك في توبك).
+
+فقط أضف هذا السطر في ملف الـ Layout الرئيسي (مثلاً `layouts/app.blade.php`) قبل إغلاق `</body>`:
+
+```html
+<x-advanced-notifications::firebase-scripts />
+```
+
+**للاشتراك في توبك معين تلقائياً (مثلاً ID رقم 1):**
+
+```html
+<x-advanced-notifications::firebase-scripts topic="1" />
+```
+
+هذا المكون سيقوم بـ:
+
+1. تحميل مكتبات Firebase تلقائياً.
+2. طلب الإذن من المستخدم.
+3. إرسال التوكن إلى الباك إند وحفظه.
+4. الاشتراك في التوبك المحدد (اختياري).
 
 ### 1. إرسال إشعار لمستخدم (Token Notification)
 
