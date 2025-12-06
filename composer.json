@@ -3,7 +3,7 @@
     "description": "A full-featured, enterprise-grade notification system for Laravel.",
     "type": "library",
     "license": "MIT",
-    "version": "1.0.0",
+
     "authors": [
         {
             "name": "Advanced Notifications Team",
