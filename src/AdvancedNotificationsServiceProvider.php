@@ -37,6 +37,10 @@ class AdvancedNotificationsServiceProvider extends ServiceProvider
                 __DIR__.'/../database/migrations' => database_path('migrations'),
             ], 'advanced-notifications-migrations');
 
+            $this->publishes([
+                __DIR__.'/../resources/views' => resource_path('views/vendor/advanced-notifications'),
+            ], 'advanced-notifications-views');
+
             $this->commands([
                 \AdvancedNotifications\Console\Commands\InstallPackage::class,
             ]);
