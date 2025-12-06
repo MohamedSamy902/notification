@@ -41,9 +41,14 @@
             // 3. Subscribe to Private Channel
             @if($userId)
                 if (window.Echo && typeof window.Echo.private === 'function') {
+                    console.log('AdvancedNotifications: Subscribing to channel App.Models.User.{{ $userId }}');
+                    
                     window.Echo.private('App.Models.User.{{ $userId }}')
+                        .listen('.Illuminate\\Notifications\\Events\\BroadcastNotificationCreated', (e) => {
+                            console.log('AdvancedNotifications: Raw Event Received:', e);
+                        })
                         .notification((notification) => {
-                            console.log('Reverb Notification:', notification);
+                            console.log('AdvancedNotifications: Notification Received:', notification);
                             
                             Swal.fire({
                                 title: notification.title,
@@ -59,6 +64,9 @@
                                     toast.onmouseleave = Swal.resumeTimer;
                                 }
                             });
+                        })
+                        .error((error) => {
+                            console.error('AdvancedNotifications: Subscription Error (Check /broadcasting/auth in Network Tab):', error);
                         });
                 } else {
                     console.error('AdvancedNotifications: Echo instance not ready for subscription.');
