@@ -43,6 +43,12 @@
                 if (window.Echo && typeof window.Echo.private === 'function') {
                     window.Echo.private('App.Models.User.{{ $userId }}')
                         .notification((notification) => {
+                        .notification((notification) => {
+                            // 1. Track Delivered
+                            if (notification.id) {
+                                axios.post(`/api/notifications/${notification.id}/delivered`).catch(e => console.error(e));
+                            }
+
                             Swal.fire({
                                 title: notification.title,
                                 text: notification.body,
@@ -55,6 +61,19 @@
                                 didOpen: (toast) => {
                                     toast.onmouseenter = Swal.stopTimer;
                                     toast.onmouseleave = Swal.resumeTimer;
+                                    
+                                    // Add click listener to toast
+                                    toast.addEventListener('click', () => {
+                                        if (notification.id) {
+                                            axios.post(`/api/notifications/${notification.id}/clicked`).then(() => {
+                                                if (notification.action_url) {
+                                                    window.location.href = notification.action_url;
+                                                }
+                                            });
+                                        } else if (notification.action_url) {
+                                            window.location.href = notification.action_url;
+                                        }
+                                    });
                                 }
                             });
                         });

@@ -16,6 +16,8 @@ Route::group(['prefix' => 'api/notifications', 'middleware' => $middleware], fun
     Route::post('/{id}/read', [NotificationController::class, 'markAsRead']);
     Route::post('/read-all', [NotificationController::class, 'markAllAsRead']);
     Route::delete('/{id}', [NotificationController::class, 'destroy']);
+    Route::post('/{id}/delivered', [NotificationController::class, 'trackDelivered']);
+    Route::post('/{id}/clicked', [NotificationController::class, 'trackClicked']);
 
     // Preferences
     Route::get('/preferences', [PreferenceController::class, 'index']);
