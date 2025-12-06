@@ -67,16 +67,24 @@ class FirebaseService implements ChannelInterface
         $accessToken = $this->getAccessToken();
         $url = "https://fcm.googleapis.com/v1/projects/{$this->projectId}/messages:send";
 
-        $message = [
-            'message' => [
-                'token' => $token,
-                'notification' => [
-                    'title' => $title,
-                    'body' => $body,
-                ],
-                'data' => $data,
+        $messagePayload = [
+            'token' => $token,
+            'notification' => [
+                'title' => $title,
+                'body' => $body,
             ],
         ];
+
+        if (!empty($data)) {
+            // Ensure all data values are strings (FCM requirement)
+            $formattedData = array_map(function($value) {
+                return is_string($value) ? $value : (string)$value;
+            }, $data);
+            
+            $messagePayload['data'] = (object)$formattedData;
+        }
+
+        $message = ['message' => $messagePayload];
 
         try {
             $this->client->post($url, [
@@ -183,9 +191,13 @@ class FirebaseService implements ChannelInterface
             ],
         ];
 
-        // Only add data if it's not empty, and ensure it's an object
+        // Only add data if it's not empty, and ensure it's an object with string values
         if (!empty($data)) {
-            $messagePayload['data'] = (object)$data;
+            $formattedData = array_map(function($value) {
+                return is_string($value) ? $value : (string)$value;
+            }, $data);
+            
+            $messagePayload['data'] = (object)$formattedData;
         }
 
         $message = ['message' => $messagePayload];
