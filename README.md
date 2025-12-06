@@ -82,6 +82,13 @@ php artisan migrate
     }
     ```
 
+    **ماذا يضيف هذا الـ Trait؟**
+    عند استخدام `HasAdvancedNotifications`، يتم إضافة العلاقات والدوال التالية لموديل المستخدم تلقائياً:
+
+    - **`deviceTokens()`**: علاقة `hasMany` لربط المستخدم بأجهزة الإشعارات الخاصة به (جدول `device_tokens`).
+    - **`routeNotificationForFcm()`**: دالة تلقائية تخبر Laravel بإرسال إشعارات FCM لجميع توكنات المستخدم المسجلة.
+    - **`Notifiable`**: يتم تضمين Trait الإشعارات الافتراضي من Laravel تلقائياً.
+
 ### 2. إعداد Firebase (للإشعارات)
 
 1.  اذهب إلى [Firebase Console](https://console.firebase.google.com/).
