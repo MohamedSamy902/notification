@@ -159,4 +159,27 @@ class SendNotificationController extends Controller
             return back()->withErrors(['error' => 'Failed to send: ' . $e->getMessage()]);
         }
     }
+
+    public function searchUsers(Request $request)
+    {
+        $query = $request->input('q');
+        if (!$query) {
+            return response()->json([]);
+        }
+
+        $userClass = config('auth.providers.users.model', 'App\\Models\\User');
+        $nameColumn = config('advanced-notifications.user_name_column', 'name');
+
+        $users = $userClass::where($nameColumn, 'LIKE', "%{$query}%")
+            ->orWhere('id', $query)
+            ->limit(10)
+            ->get(['id', $nameColumn]);
+
+        return response()->json($users->map(function ($user) use ($nameColumn) {
+            return [
+                'id' => $user->id,
+                'name' => $user->{$nameColumn}
+            ];
+        }));
+    }
 }

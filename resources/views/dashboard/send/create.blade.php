@@ -40,6 +40,15 @@
 
                     <div class="sm:col-span-3" id="recipient_field">
                         <label for="recipient_id" class="block text-sm font-medium text-gray-700">Recipient ID(s) / Topic Name</label>
+                        
+                        <!-- User Search Input (Only visible when target_type is user) -->
+                        <div id="user_search_container" class="relative mb-2">
+                            <input type="text" id="user_search" placeholder="Search user by name..." class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border p-2" autocomplete="off">
+                            <ul id="search_results" class="absolute z-10 mt-1 w-full bg-white shadow-lg max-h-60 rounded-md py-1 text-base ring-1 ring-black ring-opacity-5 overflow-auto focus:outline-none sm:text-sm hidden">
+                                <!-- Results will be populated here -->
+                            </ul>
+                        </div>
+
                         <input type="text" name="recipient_id" id="recipient_id" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border p-2" placeholder="e.g. 1, 2, 5">
                         <p class="mt-1 text-xs text-gray-500" id="recipient_help">Enter User IDs separated by comma (e.g., 1, 2, 5)</p>
                     </div>
@@ -105,6 +114,7 @@
             const type = document.getElementById('target_type').value;
             const field = document.getElementById('recipient_field');
             const help = document.getElementById('recipient_help');
+            const searchContainer = document.getElementById('user_search_container');
             
             if (type === 'all') {
                 field.style.display = 'none';
@@ -112,10 +122,62 @@
                 field.style.display = 'block';
                 if (type === 'user') {
                     help.innerText = 'Enter User IDs separated by comma (e.g., 1, 2, 5)';
+                    searchContainer.style.display = 'block';
                 } else {
                     help.innerText = 'Enter Topic Name (e.g., news)';
+                    searchContainer.style.display = 'none';
                 }
             }
         }
+
+        // Initialize state
+        document.addEventListener('DOMContentLoaded', function() {
+            toggleRecipientField();
+
+            const searchInput = document.getElementById('user_search');
+            const resultsList = document.getElementById('search_results');
+            const recipientInput = document.getElementById('recipient_id');
+
+            searchInput.addEventListener('input', function() {
+                const query = this.value;
+                if (query.length < 2) {
+                    resultsList.classList.add('hidden');
+                    return;
+                }
+
+                fetch(`{{ route('advanced-notifications.users.search') }}?q=${query}`)
+                    .then(response => response.json())
+                    .then(users => {
+                        resultsList.innerHTML = '';
+                        if (users.length > 0) {
+                            resultsList.classList.remove('hidden');
+                            users.forEach(user => {
+                                const li = document.createElement('li');
+                                li.className = 'cursor-pointer select-none relative py-2 pl-3 pr-9 hover:bg-indigo-600 hover:text-white text-gray-900 border-b border-gray-100 last:border-0';
+                                li.textContent = `${user.name} (#${user.id})`;
+                                li.onclick = () => {
+                                    const currentIds = recipientInput.value.split(',').map(id => id.trim()).filter(id => id);
+                                    if (!currentIds.includes(String(user.id))) {
+                                        currentIds.push(user.id);
+                                        recipientInput.value = currentIds.join(', ');
+                                    }
+                                    searchInput.value = '';
+                                    resultsList.classList.add('hidden');
+                                };
+                                resultsList.appendChild(li);
+                            });
+                        } else {
+                            resultsList.classList.add('hidden');
+                        }
+                    });
+            });
+
+            // Hide results when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!searchInput.contains(e.target) && !resultsList.contains(e.target)) {
+                    resultsList.classList.add('hidden');
+                }
+            });
+        });
     </script>
 @endsection

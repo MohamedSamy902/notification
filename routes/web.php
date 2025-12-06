@@ -39,6 +39,7 @@ Route::group(['middleware' => ['web'], 'prefix' => 'dashboard', 'as' => 'advance
     // Send Notification
     Route::get('/send', [SendNotificationController::class, 'create'])->name('send.create');
     Route::post('/send', [SendNotificationController::class, 'store'])->name('send.store');
+    Route::get('/users/search', [SendNotificationController::class, 'searchUsers'])->name('users.search');
 
     // Analytics
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
