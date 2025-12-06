@@ -18,6 +18,11 @@
 
         <script>
             document.addEventListener('DOMContentLoaded', function() {
+                // Ensure cookies are sent with requests
+                if (typeof axios !== 'undefined') {
+                    axios.defaults.withCredentials = true;
+                }
+
                 // 1. Configuration from Laravel Config
                 const firebaseConfig = {
                     apiKey: "{{ config('advanced-notifications.firebase.frontend.api_key') }}",
