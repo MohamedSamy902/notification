@@ -173,12 +173,31 @@ FIREBASE_VAPID_KEY=B... (المفتاح الطويل)
 <x-advanced-notifications::firebase-scripts topic="1" />
 ```
 
-هذا المكون سيقوم بـ:
-
 1. تحميل مكتبات Firebase تلقائياً.
 2. طلب الإذن من المستخدم.
 3. إرسال التوكن إلى الباك إند وحفظه.
 4. الاشتراك في التوبك المحدد (اختياري).
+
+### 2. تفعيل الإشعارات الفورية (Real-time) مع SweetAlert
+
+إذا كنت تستخدم Laravel Reverb أو Pusher، وتريد عرض الإشعارات بشكل جميل باستخدام SweetAlert، استخدم المكون التالي:
+
+```html
+<x-advanced-notifications::echo-scripts user-id="{{ auth()->id() }}" />
+```
+
+**أو** يمكنك استخدام المكون الشامل الذي يجمع بين Firebase و Echo في سطر واحد:
+
+```html
+<x-advanced-notifications::scripts topic="1" user-id="{{ auth()->id() }}" />
+```
+
+هذا المكون سيقوم بـ:
+
+1. تحميل مكتبات Echo و Pusher و SweetAlert2.
+2. تهيئة Echo للعمل مع Reverb (أو Pusher).
+3. الاستماع لقناة المستخدم الخاصة (`App.Models.User.{id}`).
+4. عرض الإشعار عند وصوله باستخدام SweetAlert في أعلى اليسار.
 
 ### 1. إرسال إشعار لمستخدم (Token Notification)
 
