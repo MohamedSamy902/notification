@@ -72,13 +72,30 @@ php artisan migrate
     ```php
     namespace App\Models;
 
-    use Laravel\Sanctum\HasApiTokens; // <--- أضف هذا السطر
-    use AdvancedNotifications\Traits\HasAdvancedNotifications; // <--- وهذا السطر
+    use Illuminate\Contracts\Auth\MustVerifyEmail;
+    use Illuminate\Database\Eloquent\Factories\HasFactory;
     use Illuminate\Foundation\Auth\User as Authenticatable;
+    use Illuminate\Notifications\Notifiable;
+    use Laravel\Sanctum\HasApiTokens;
+    use AdvancedNotifications\Traits\HasAdvancedNotifications; // <--- Import Trait
 
     class User extends Authenticatable
     {
-        use HasApiTokens, HasAdvancedNotifications, ...; // <--- واستخدمهم هنا
+        use HasApiTokens, HasFactory, Notifiable;
+        use HasAdvancedNotifications; // <--- Use Trait
+
+        /**
+         * The attributes that are mass assignable.
+         *
+         * @var array<int, string>
+         */
+        protected $fillable = [
+            'name',
+            'email',
+            'password',
+        ];
+
+        // ... rest of your model
     }
     ```
 
