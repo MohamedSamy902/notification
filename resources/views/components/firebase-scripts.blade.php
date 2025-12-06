@@ -73,8 +73,8 @@
                 // 4. Register Token API
                 async function registerToken(token) {
                     try {
-                        // Register Token
-                        await axios.post('/api/notifications/register-token', {
+                        // Register Token (Using Web-API endpoint for Session Auth)
+                        await axios.post('/web-api/notifications/register-token', {
                             token: token,
                             device_type: 'web'
                         });
@@ -83,14 +83,8 @@
                         // Subscribe to Topic if provided
                         const topicName = "{{ $topic }}";
                         if (topicName) {
-                            // Note: We need an endpoint that accepts topic NAME, or we assume the user passes ID.
-                            // For better DX, let's assume we might need a new endpoint or the user passes the ID.
-                            // If the user passes a string name, we might need a different logic or endpoint.
-                            // For now, let's assume the user passes the ID as requested before, or we can improve the API later.
-                            // But wait, the user asked to subscribe to a topic.
-                            
-                            // Let's try to subscribe. If $topic is numeric, treat as ID.
-                            let subscribeUrl = `/api/notifications/topics/${topicName}/subscribe`;
+                            // Using Web-API endpoint
+                            let subscribeUrl = `/web-api/notifications/topics/${topicName}/subscribe`;
                             
                             await axios.post(subscribeUrl, { token: token });
                             console.log(`Subscribed to topic: ${topicName}`);

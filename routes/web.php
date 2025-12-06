@@ -44,8 +44,8 @@ Route::group(['middleware' => ['web'], 'prefix' => 'dashboard', 'as' => 'advance
     Route::get('/analytics', [AnalyticsController::class, 'index'])->name('analytics.index');
 });
 
-// Frontend Routes (Session Based) - Moved from API to ensure cookies work
-Route::group(['middleware' => ['web', 'auth:web'], 'prefix' => 'api/notifications'], function () {
+// Frontend Routes (Session Based) - Distinct prefix to avoid conflict
+Route::group(['middleware' => ['web', 'auth:web'], 'prefix' => 'web-api/notifications'], function () {
     // Tokens
     Route::post('/register-token', [TokenController::class, 'register']);
     Route::post('/remove-token', [TokenController::class, 'remove']);
