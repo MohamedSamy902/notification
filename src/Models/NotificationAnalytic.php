@@ -18,4 +18,14 @@ class NotificationAnalytic extends Model
     protected $casts = [
         'metadata' => 'array',
     ];
+
+    public function notification()
+    {
+        return $this->belongsTo(AdvancedNotification::class, 'notification_id');
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(config('auth.providers.users.model', 'App\\Models\\User'), 'user_id');
+    }
 }

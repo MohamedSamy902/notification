@@ -27,10 +27,10 @@ class AnalyticsService
         }
 
         return [
-            'delivered' => $query->where('event', 'delivered')->count(),
-            'read' => $query->where('event', 'read')->count(),
-            'clicked' => $query->where('event', 'clicked')->count(),
-            'failed' => $query->where('event', 'failed')->count(),
+            'delivered' => $query->where('event_type', 'delivered')->count(),
+            'read' => $query->where('event_type', 'read')->count(),
+            'clicked' => $query->where('event_type', 'clicked')->count(),
+            'failed' => $query->where('event_type', 'failed')->count(),
         ];
     }
 }
