@@ -29,10 +29,30 @@
 
 ### 2. تثبيت الباكدج
 
-قم بتنفيذ الأمر التالي في التيرمينال داخل مجلد مشروعك:
+بما أن الباكدج غير مرفوع على Packagist بعد، يجب عليك إضافة الرابط الخاص به في ملف `composer.json` في مشروعك أولاً.
+
+1. افتح ملف `composer.json` في مشروعك وأضف هذا الجزء داخل `repositories`:
+
+```json
+"repositories": [
+    {
+        "type": "vcs",
+        "url": "https://github.com/MohamedSamy902/notification"
+    }
+]
+```
+
+2. تأكد من إعدادات الاستقرار (Stability) في نفس الملف:
+
+```json
+"minimum-stability": "dev",
+"prefer-stable": true
+```
+
+3. الآن قم بتنفيذ الأمر التالي في التيرمينال:
 
 ```bash
-composer require advanced-notifications/core
+composer require advanced-notifications/core:dev-main
 ```
 
 ### 3. نشر الملفات (Publishing)
