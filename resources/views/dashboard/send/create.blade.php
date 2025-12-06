@@ -39,9 +39,9 @@
                     </div>
 
                     <div class="sm:col-span-3" id="recipient_field">
-                        <label for="recipient_id" class="block text-sm font-medium text-gray-700">Recipient ID / Topic Name</label>
-                        <input type="text" name="recipient_id" id="recipient_id" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border p-2">
-                        <p class="mt-1 text-xs text-gray-500" id="recipient_help">Enter User ID (e.g., 1)</p>
+                        <label for="recipient_id" class="block text-sm font-medium text-gray-700">Recipient ID(s) / Topic Name</label>
+                        <input type="text" name="recipient_id" id="recipient_id" class="mt-1 focus:ring-indigo-500 focus:border-indigo-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md border p-2" placeholder="e.g. 1, 2, 5">
+                        <p class="mt-1 text-xs text-gray-500" id="recipient_help">Enter User IDs separated by comma (e.g., 1, 2, 5)</p>
                     </div>
 
                     <!-- Channels -->
@@ -111,7 +111,7 @@
             } else {
                 field.style.display = 'block';
                 if (type === 'user') {
-                    help.innerText = 'Enter User ID (e.g., 1)';
+                    help.innerText = 'Enter User IDs separated by comma (e.g., 1, 2, 5)';
                 } else {
                     help.innerText = 'Enter Topic Name (e.g., news)';
                 }
