@@ -94,6 +94,18 @@ class FirebaseService implements ChannelInterface
                 ],
                 'json' => $message,
             ]);
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+            $response = $e->getResponse();
+            $statusCode = $response->getStatusCode();
+
+            // 404: Requested entity was not found (Token invalid/unregistered)
+            // 410: The registration token is no longer valid (Gone)
+            if (in_array($statusCode, [404, 410])) {
+                Log::warning("FCM Token Invalid or Expired ($statusCode). Deleting token: " . substr($token, 0, 20) . "...");
+                \AdvancedNotifications\Models\DeviceToken::where('token', $token)->delete();
+            } else {
+                Log::error("FCM Client Error: " . $e->getMessage());
+            }
         } catch (\Exception $e) {
             Log::error("FCM Send Error: " . $e->getMessage());
         }
